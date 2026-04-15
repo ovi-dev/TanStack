@@ -6,13 +6,13 @@
 
 **APIs públicas usadas en los ejemplos:**
 
-| API | Base URL | Para qué se usa |
-|-----|----------|-----------------|
-| **JSONPlaceholder** | `https://jsonplaceholder.typicode.com` | CRUD completo — posts, users, todos |
-| **GitHub API** | `https://api.github.com` | GET de usuarios y repositorios |
-| **Pokémon API** | `https://pokeapi.co/api/v2` | Paginación e infinite scroll |
-| **Open-Meteo** | `https://api.open-meteo.com/v1` | Polling de datos en tiempo real (sin auth) |
-| **Rick & Morty API** | `https://rickandmortyapi.com/api` | Queries dependientes y paralelas |
+| API                  | Base URL                               | Para qué se usa                            |
+| -------------------- | -------------------------------------- | ------------------------------------------ |
+| **JSONPlaceholder**  | `https://jsonplaceholder.typicode.com` | CRUD completo — posts, users, todos        |
+| **GitHub API**       | `https://api.github.com`               | GET de usuarios y repositorios             |
+| **Pokémon API**      | `https://pokeapi.co/api/v2`            | Paginación e infinite scroll               |
+| **Open-Meteo**       | `https://api.open-meteo.com/v1`        | Polling de datos en tiempo real (sin auth) |
+| **Rick & Morty API** | `https://rickandmortyapi.com/api`      | Queries dependientes y paralelas           |
 
 ---
 
@@ -22,7 +22,7 @@
 2. [Instalación y configuración](#2--instalación-y-configuración)
 3. [Devtools — tu mejor aliado](#3--devtools--tu-mejor-aliado)
 4. [useQuery — leer datos](#4--usequery-leer-datos)
-5. [queryKey — el identificador del caché](#5--querykey-el-identificador-del-caché)
+5. [queryKey — el identificador del caché · Query Key Factory](#5--querykey-el-identificador-del-caché)
 6. [queryFn — la función que hace el fetch](#6--queryfn-la-función-que-hace-el-fetch)
 7. [enabled — queries condicionales](#7--enabled-queries-condicionales)
 8. [status vs fetchStatus — dos estados distintos](#8--status-vs-fetchstatus-dos-estados-distintos)
@@ -37,7 +37,7 @@
 17. [Actualizaciones optimistas](#17--actualizaciones-optimistas)
 18. [Opciones avanzadas de useQuery](#18--opciones-avanzadas-de-usequery)
 19. [useMutationState — estado global de mutaciones](#19--usemutationstate-estado-global-de-mutaciones)
-20. [Organizar hooks por dominio](#20--organizar-hooks-por-dominio)
+20. [Organizar hooks por dominio · `queryOptions()`](#20--organizar-hooks-por-dominio)
 21. [Resumen: cuándo usar cada herramienta](#21--resumen-cuándo-usar-cada-herramienta)
 
 ---
@@ -69,7 +69,11 @@ useEffect(() => {
 Con TanStack Query:
 
 ```tsx
-const { data: posts, isLoading, error } = useQuery({
+const {
+  data: posts,
+  isLoading,
+  error,
+} = useQuery({
   queryKey: ['posts'],
   queryFn: () => fetch('https://jsonplaceholder.typicode.com/posts').then(res => res.json()),
 });
@@ -77,15 +81,15 @@ const { data: posts, isLoading, error } = useQuery({
 
 TanStack Query gestiona automáticamente:
 
-| Característica | Descripción |
-|---|---|
-| **Caché** | Guarda los datos y no repite peticiones innecesarias |
-| **Loading / Error states** | `isLoading`, `isError`, `isSuccess` listos para usar |
-| **Re-fetch automático** | Al volver a la pestaña, al reconectar, por intervalo... |
-| **Deduplicación** | Si 3 componentes piden los mismos datos a la vez, solo hace 1 petición |
-| **Background updates** | Actualiza en segundo plano sin bloquear la UI |
-| **Retry automático** | Reintenta automáticamente si hay un error de red |
-| **Stale-while-revalidate** | Muestra datos del caché inmediatamente y actualiza en background |
+| Característica             | Descripción                                                            |
+| -------------------------- | ---------------------------------------------------------------------- |
+| **Caché**                  | Guarda los datos y no repite peticiones innecesarias                   |
+| **Loading / Error states** | `isLoading`, `isError`, `isSuccess` listos para usar                   |
+| **Re-fetch automático**    | Al volver a la pestaña, al reconectar, por intervalo...                |
+| **Deduplicación**          | Si 3 componentes piden los mismos datos a la vez, solo hace 1 petición |
+| **Background updates**     | Actualiza en segundo plano sin bloquear la UI                          |
+| **Retry automático**       | Reintenta automáticamente si hay un error de red                       |
+| **Stale-while-revalidate** | Muestra datos del caché inmediatamente y actualiza en background       |
 
 ---
 
@@ -118,13 +122,13 @@ function App() {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,      // 5 min antes de considerar los datos obsoletos
-      gcTime: 1000 * 60 * 10,         // 10 min en caché después de desmontar
-      retry: 2,                        // 2 reintentos si falla
-      refetchOnWindowFocus: true,      // re-fetch al volver a la pestaña
+      staleTime: 1000 * 60 * 5, // 5 min antes de considerar los datos obsoletos
+      gcTime: 1000 * 60 * 10, // 10 min en caché después de desmontar
+      retry: 2, // 2 reintentos si falla
+      refetchOnWindowFocus: true, // re-fetch al volver a la pestaña
     },
     mutations: {
-      retry: 0,                        // las mutaciones no reintentan por defecto
+      retry: 0, // las mutaciones no reintentan por defecto
     },
   },
 });
@@ -167,9 +171,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
 ```tsx
 <ReactQueryDevtools
-  initialIsOpen={false}       // empieza cerrado (recomendado)
+  initialIsOpen={false} // empieza cerrado (recomendado)
   buttonPosition="bottom-right" // posición del botón flotante
-  position="bottom"           // posición del panel: 'top' | 'bottom' | 'left' | 'right'
+  position="bottom" // posición del panel: 'top' | 'bottom' | 'left' | 'right'
 />
 ```
 
@@ -197,31 +201,31 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
 ```tsx
 const resultado = useQuery({
-  queryKey: ['identificador-unico'],  // clave del caché
+  queryKey: ['identificador-unico'], // clave del caché
   queryFn: () => llamadaAlServidor(), // función que retorna una Promise
 });
 ```
 
 ### Todas las propiedades que devuelve
 
-| Propiedad | Tipo | Descripción |
-|-----------|------|-------------|
-| `data` | `T \| undefined` | Los datos devueltos por `queryFn`. `undefined` hasta que carga |
-| `isPending` | `boolean` | `true` cuando no hay datos todavía (primera carga, sin caché) |
-| `isLoading` | `boolean` | Lo mismo que `isPending && isFetching` — carga inicial activa |
-| `isFetching` | `boolean` | `true` siempre que está haciendo fetch (incluye re-fetch en background) |
-| `isError` | `boolean` | `true` si ocurrió un error |
-| `error` | `Error \| null` | El objeto de error |
-| `isSuccess` | `boolean` | `true` cuando los datos se cargaron correctamente |
-| `isStale` | `boolean` | `true` si los datos se consideran obsoletos (pasó el `staleTime`) |
-| `isRefetching` | `boolean` | `true` si está actualizando datos que ya existían en caché |
-| `refetch` | `function` | Fuerza una recarga manual |
-| `status` | `'pending' \| 'error' \| 'success'` | Estado de los datos (ver sección 8) |
-| `fetchStatus` | `'fetching' \| 'paused' \| 'idle'` | Estado de la red (ver sección 8) |
-| `dataUpdatedAt` | `number` | Timestamp de la última actualización exitosa |
-| `errorUpdatedAt` | `number` | Timestamp del último error |
-| `failureCount` | `number` | Número de reintentos fallidos consecutivos |
-| `failureReason` | `Error \| null` | Error del último intento fallido |
+| Propiedad        | Tipo                                | Descripción                                                             |
+| ---------------- | ----------------------------------- | ----------------------------------------------------------------------- |
+| `data`           | `T \| undefined`                    | Los datos devueltos por `queryFn`. `undefined` hasta que carga          |
+| `isPending`      | `boolean`                           | `true` cuando no hay datos todavía (primera carga, sin caché)           |
+| `isLoading`      | `boolean`                           | Lo mismo que `isPending && isFetching` — carga inicial activa           |
+| `isFetching`     | `boolean`                           | `true` siempre que está haciendo fetch (incluye re-fetch en background) |
+| `isError`        | `boolean`                           | `true` si ocurrió un error                                              |
+| `error`          | `Error \| null`                     | El objeto de error                                                      |
+| `isSuccess`      | `boolean`                           | `true` cuando los datos se cargaron correctamente                       |
+| `isStale`        | `boolean`                           | `true` si los datos se consideran obsoletos (pasó el `staleTime`)       |
+| `isRefetching`   | `boolean`                           | `true` si está actualizando datos que ya existían en caché              |
+| `refetch`        | `function`                          | Fuerza una recarga manual                                               |
+| `status`         | `'pending' \| 'error' \| 'success'` | Estado de los datos (ver sección 8)                                     |
+| `fetchStatus`    | `'fetching' \| 'paused' \| 'idle'`  | Estado de la red (ver sección 8)                                        |
+| `dataUpdatedAt`  | `number`                            | Timestamp de la última actualización exitosa                            |
+| `errorUpdatedAt` | `number`                            | Timestamp del último error                                              |
+| `failureCount`   | `number`                            | Número de reintentos fallidos consecutivos                              |
+| `failureReason`  | `Error \| null`                     | Error del último intento fallido                                        |
 
 ### Ejemplo completo con manejo de estados
 
@@ -272,14 +276,13 @@ function ListaDePosts() {
 
 ```tsx
 // GET https://jsonplaceholder.typicode.com/posts/1
-const getPost = (id: number): Promise<Post> =>
-  fetch(`https://jsonplaceholder.typicode.com/posts/${id}`).then(res => res.json());
+const getPost = (id: number): Promise<Post> => fetch(`https://jsonplaceholder.typicode.com/posts/${id}`).then(res => res.json());
 
 export const usePost = (id: number) =>
   useQuery({
-    queryKey: ['posts', id],         // clave única por ID
+    queryKey: ['posts', id], // clave única por ID
     queryFn: () => getPost(id),
-    enabled: !!id,                   // no ejecuta si id es 0 o undefined
+    enabled: !!id, // no ejecuta si id es 0 o undefined
   });
 ```
 
@@ -319,7 +322,9 @@ function PerfilGitHub({ username }: { username: string }) {
     <div>
       <img src={user.avatar_url} alt={user.login} />
       <h2>{user.name}</h2>
-      <p>{user.public_repos} repositorios · {user.followers} seguidores</p>
+      <p>
+        {user.public_repos} repositorios · {user.followers} seguidores
+      </p>
     </div>
   );
 }
@@ -336,12 +341,12 @@ function PerfilGitHub({ username }: { username: string }) {
 ### Formas válidas
 
 ```tsx
-queryKey: ['posts']                              // clave simple → todos los posts
-queryKey: ['posts', 1]                           // post con id=1 → caché propio
-queryKey: ['posts', postId]                      // varía según el ID
-queryKey: ['github', 'user', username]           // namespacing jerárquico
-queryKey: ['posts', { status: 'published' }]     // con filtros como objeto
-queryKey: ['weather', { lat: 40.4, lon: -3.7 }] // con coordenadas
+queryKey: ['posts']; // clave simple → todos los posts
+queryKey: ['posts', 1]; // post con id=1 → caché propio
+queryKey: ['posts', postId]; // varía según el ID
+queryKey: ['github', 'user', username]; // namespacing jerárquico
+queryKey: ['posts', { status: 'published' }]; // con filtros como objeto
+queryKey: ['weather', { lat: 40.4, lon: -3.7 }]; // con coordenadas
 ```
 
 ### ¿Por qué importa el caché compartido?
@@ -362,44 +367,56 @@ useQuery({ queryKey: ['posts', 2], queryFn: () => getPost(2) });
 // Cada ID tiene su propio caché independiente
 ```
 
-### Buenas prácticas para organizar queryKeys
+### Buenas prácticas: Query Key Factory
+
+En aplicaciones reales, gestionar `queryKey` como strings sueltos es frágil: un typo rompe el caché en silencio y no hay autocompletado. El patrón **Query Key Factory** (recomendado por [TkDodo](https://tkdodo.eu/blog/effective-react-query-keys), maintainer de TanStack) centraliza todas las claves en un objeto jerárquico donde cada función de clave **extiende** a la anterior usando spreads.
 
 ```tsx
-// Patrón recomendado: objeto de claves centralizado
+// api/hooks/postKeys.ts
 export const postKeys = {
+  /** Raíz — invalida TODO lo relacionado con posts */
   all: ['posts'] as const,
+
+  /** Padre de todas las listas */
   lists: () => [...postKeys.all, 'list'] as const,
-  list: (filters: object) => [...postKeys.lists(), filters] as const,
+  /** Lista con filtros/paginación opcionales */
+  list: (params?: object) => [...postKeys.lists(), params] as const,
+
+  /** Padre de todos los detalles */
   details: () => [...postKeys.all, 'detail'] as const,
+  /** Detalle de un post concreto */
   detail: (id: number) => [...postKeys.details(), id] as const,
 };
-
-// Uso
-useQuery({ queryKey: postKeys.detail(1), queryFn: () => getPost(1) });
-useQuery({ queryKey: postKeys.list({ status: 'published' }), queryFn: getPosts });
-
-// Invalida solo los detalles, no las listas
-queryClient.invalidateQueries({ queryKey: postKeys.details() });
 ```
+
+**Granularidad de invalidación — prefix matching:**
+
+```tsx
+// Invalida TODO (listas + detalles)
+queryClient.invalidateQueries({ queryKey: postKeys.all });
+
+// Invalida solo listas (no toca los detalles)
+queryClient.invalidateQueries({ queryKey: postKeys.lists() });
+
+// Invalida solo el post con id=5
+queryClient.invalidateQueries({ queryKey: postKeys.detail(5) });
+```
+
+> `invalidateQueries` usa **prefix matching**: invalida cualquier query cuya clave empiece por la clave dada. Gracias a los spreads, `['posts']` es prefijo automático de `['posts', 'list', {...}]` y `['posts', 'detail', 5]`. Al invalidar un nivel padre, todos sus descendientes quedan invalidados en cascada.
 
 ---
 
-## 6 — `queryFn`: la función que hace el fetch
+## 6 — `queryFn` — la función que hace el fetch
 
-**¿Qué es?** La función que TanStack llama para obtener los datos. Debe devolver una **Promise**.
-
-**Regla importante:** Si lanza un error (`throw`), TanStack lo captura y pone la query en estado `isError`. Debes lanzarlo explícitamente si usas `fetch` nativo (que no lanza error en respuestas 4xx/5xx).
-
-### Formas de definirla
+**¿Qué es?** La función que TanStack llama para obtener los datos. Debe devolver una `Promise` que resuelva con los datos o lance un error.
 
 ```tsx
 // Forma 1 — inline con fetch nativo (siempre verifica res.ok)
 queryFn: () =>
-  fetch('https://jsonplaceholder.typicode.com/posts')
-    .then(res => {
-      if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
-      return res.json();
-    });
+  fetch('https://jsonplaceholder.typicode.com/posts').then(res => {
+    if (!res.ok) throw new Error(`HTTP error: ${res.status}`);
+    return res.json();
+  });
 
 // Forma 2 — con axios (lanza error automáticamente en 4xx/5xx)
 queryFn: () => axios.get('/api/posts').then(res => res.data);
@@ -424,7 +441,7 @@ useQuery({
     const [, id] = queryKey; // extrae el userId de la clave
     const res = await fetch(
       `https://jsonplaceholder.typicode.com/users/${id}/posts`,
-      { signal } // ← pasa el signal para cancelación automática
+      { signal }, // ← pasa el signal para cancelación automática
     );
     if (!res.ok) throw new Error('Error al obtener posts');
     return res.json();
@@ -438,11 +455,9 @@ useQuery({
 ```tsx
 // api/posts.service.ts — funciones puras, sin TanStack
 export const postsService = {
-  getAll: (): Promise<Post[]> =>
-    fetch('https://jsonplaceholder.typicode.com/posts').then(r => r.json()),
+  getAll: (): Promise<Post[]> => fetch('https://jsonplaceholder.typicode.com/posts').then(r => r.json()),
 
-  getById: (id: number): Promise<Post> =>
-    fetch(`https://jsonplaceholder.typicode.com/posts/${id}`).then(r => r.json()),
+  getById: (id: number): Promise<Post> => fetch(`https://jsonplaceholder.typicode.com/posts/${id}`).then(r => r.json()),
 
   create: (post: Omit<Post, 'id'>): Promise<Post> =>
     fetch('https://jsonplaceholder.typicode.com/posts', {
@@ -465,11 +480,9 @@ export const postsService = {
 };
 
 // api/hooks/usePosts.ts — solo lógica de TanStack
-export const usePosts = () =>
-  useQuery({ queryKey: ['posts'], queryFn: postsService.getAll });
+export const usePosts = () => useQuery({ queryKey: ['posts'], queryFn: postsService.getAll });
 
-export const usePost = (id: number) =>
-  useQuery({ queryKey: ['posts', id], queryFn: () => postsService.getById(id) });
+export const usePost = (id: number) => useQuery({ queryKey: ['posts', id], queryFn: () => postsService.getById(id) });
 ```
 
 ---
@@ -479,6 +492,7 @@ export const usePost = (id: number) =>
 **¿Qué es?** Opción booleana que controla si la query debe ejecutarse.
 
 **¿Cuándo usarlo?**
+
 - Cuando necesitas un dato antes de poder hacer la petición (dependencias)
 - Cuando la query solo tiene sentido en ciertos estados
 - Para evitar llamadas con datos inválidos (id vacío, null, etc.)
@@ -488,7 +502,7 @@ export const usePost = (id: number) =>
 useQuery({
   queryKey: ['posts', postId],
   queryFn: () => getPost(postId),
-  enabled: !!postId,   // solo ejecuta si postId tiene valor truthy
+  enabled: !!postId, // solo ejecuta si postId tiene valor truthy
 });
 
 // !!0        → false → NO ejecuta
@@ -539,7 +553,7 @@ const { data: repos } = useQuery({
 const { data, refetch, isFetching } = useQuery({
   queryKey: ['github', 'user', username],
   queryFn: () => getGitHubUser(username),
-  enabled: false,       // no se ejecuta al montar
+  enabled: false, // no se ejecuta al montar
 });
 
 return (
@@ -575,21 +589,26 @@ TanStack Query tiene **dos estados independientes** que conviene entender bien:
 
 Porque pueden darse combinaciones diferentes al mismo tiempo:
 
-| status | fetchStatus | Situación real |
-|--------|-------------|----------------|
-| `pending` | `fetching` | Primera carga — no hay datos y está pidiendo |
-| `pending` | `paused` | Sin red — esperando reconexión (nunca hubo datos) |
-| `pending` | `idle` | Query deshabilitada (`enabled: false`) |
-| `success` | `idle` | Tiene datos, no está actualizando — estado normal |
-| `success` | `fetching` | Tiene datos y está actualizando en background |
-| `error` | `idle` | Falló y no va a reintentar más |
-| `error` | `fetching` | Falló pero está reintentando |
+| status    | fetchStatus | Situación real                                    |
+| --------- | ----------- | ------------------------------------------------- |
+| `pending` | `fetching`  | Primera carga — no hay datos y está pidiendo      |
+| `pending` | `paused`    | Sin red — esperando reconexión (nunca hubo datos) |
+| `pending` | `idle`      | Query deshabilitada (`enabled: false`)            |
+| `success` | `idle`      | Tiene datos, no está actualizando — estado normal |
+| `success` | `fetching`  | Tiene datos y está actualizando en background     |
+| `error`   | `idle`      | Falló y no va a reintentar más                    |
+| `error`   | `fetching`  | Falló pero está reintentando                      |
 
 ### Cómo usarlos en la UI
 
 ```tsx
 function PostsPanel() {
-  const { status, fetchStatus, data: posts, isFetching } = useQuery({
+  const {
+    status,
+    fetchStatus,
+    data: posts,
+    isFetching,
+  } = useQuery({
     queryKey: ['posts'],
     queryFn: getPosts,
   });
@@ -601,9 +620,11 @@ function PostsPanel() {
   // fetchStatus / isFetching controla el indicador de actualización
   return (
     <div>
-      {isFetching && <BarraDeProgreso />}   {/* actualización en background */}
+      {isFetching && <BarraDeProgreso />} {/* actualización en background */}
       <ul>
-        {posts.map(p => <li key={p.id}>{p.title}</li>)}
+        {posts.map(p => (
+          <li key={p.id}>{p.title}</li>
+        ))}
       </ul>
     </div>
   );
@@ -638,27 +659,27 @@ const {
 
 ```tsx
 const mutation = useMutation({
-  mutationFn: (variables) => llamadaAPI(variables),
+  mutationFn: variables => llamadaAPI(variables),
 });
 ```
 
 ### Todas las propiedades que devuelve
 
-| Propiedad | Tipo | Descripción |
-|-----------|------|-------------|
-| `mutate` | `function` | Dispara la mutación. No devuelve Promise. Usa callbacks. |
-| `mutateAsync` | `async function` | Dispara y devuelve una Promise. Usa `await`. |
-| `isPending` | `boolean` | `true` mientras se está ejecutando |
-| `isSuccess` | `boolean` | `true` si terminó sin errores |
-| `isError` | `boolean` | `true` si hubo un error |
-| `isIdle` | `boolean` | `true` si todavía no se ha ejecutado (estado inicial) |
-| `data` | `T \| undefined` | El dato que devolvió la mutación si fue exitosa |
-| `error` | `Error \| null` | El error si falló |
-| `variables` | `TVariables \| undefined` | Lo que se pasó a `mutate()` en el último llamado |
-| `reset` | `function` | Limpia el estado — vuelve a `idle` |
-| `status` | `'idle' \| 'pending' \| 'success' \| 'error'` | Estado actual |
-| `submittedAt` | `number` | Timestamp de cuándo se llamó a `mutate()` |
-| `failureCount` | `number` | Número de reintentos fallidos |
+| Propiedad      | Tipo                                          | Descripción                                              |
+| -------------- | --------------------------------------------- | -------------------------------------------------------- |
+| `mutate`       | `function`                                    | Dispara la mutación. No devuelve Promise. Usa callbacks. |
+| `mutateAsync`  | `async function`                              | Dispara y devuelve una Promise. Usa `await`.             |
+| `isPending`    | `boolean`                                     | `true` mientras se está ejecutando                       |
+| `isSuccess`    | `boolean`                                     | `true` si terminó sin errores                            |
+| `isError`      | `boolean`                                     | `true` si hubo un error                                  |
+| `isIdle`       | `boolean`                                     | `true` si todavía no se ha ejecutado (estado inicial)    |
+| `data`         | `T \| undefined`                              | El dato que devolvió la mutación si fue exitosa          |
+| `error`        | `Error \| null`                               | El error si falló                                        |
+| `variables`    | `TVariables \| undefined`                     | Lo que se pasó a `mutate()` en el último llamado         |
+| `reset`        | `function`                                    | Limpia el estado — vuelve a `idle`                       |
+| `status`       | `'idle' \| 'pending' \| 'success' \| 'error'` | Estado actual                                            |
+| `submittedAt`  | `number`                                      | Timestamp de cuándo se llamó a `mutate()`                |
+| `failureCount` | `number`                                      | Número de reintentos fallidos                            |
 
 ### POST — Crear un post (JSONPlaceholder)
 
@@ -698,7 +719,9 @@ function NuevoPost() {
       {isError && (
         <div>
           <p>Error: {error.message}</p>
-          <button type="button" onClick={reset}>Cerrar</button>
+          <button type="button" onClick={reset}>
+            Cerrar
+          </button>
         </div>
       )}
     </form>
@@ -740,10 +763,7 @@ function BotonesPost({ postId }: { postId: number }) {
   const { mutate: deletePost, isPending } = useDeletePost();
 
   return (
-    <button
-      onClick={() => deletePost(postId)}
-      disabled={isPending}
-    >
+    <button onClick={() => deletePost(postId)} disabled={isPending}>
       {isPending ? 'Borrando...' : 'Borrar'}
     </button>
   );
@@ -756,13 +776,183 @@ function BotonesPost({ postId }: { postId: number }) {
 const { mutate, isError, error, reset } = useMutation({ mutationFn: createPost });
 
 // Después de un error, el usuario puede cerrar el mensaje y reintentar
-{isError && (
-  <div className="error-toast">
-    <p>{error.message}</p>
-    <button onClick={reset}>✕</button>   {/* limpia el estado de error */}
-  </div>
-)}
+{
+  isError && (
+    <div className="error-toast">
+      <p>{error.message}</p>
+      <button onClick={reset}>✕</button> {/* limpia el estado de error */}
+    </div>
+  );
+}
 ```
+
+### POST con muchos campos — tipando el objeto completo con un `type`
+
+Cuando el formulario tiene muchos campos, lo más limpio es definir el tipo fuera del hook y referenciarlo en `mutationFn`. El hook queda legible sin importar cuántos campos tenga el payload.
+
+> Patrón extraído de `useExport` del proyecto con la API de JSONPlaceholder adaptado a un caso real con 15+ campos.
+
+```ts
+// types/post.types.ts — defines todos los campos del payload en un solo lugar
+export type CreateFullPostPayload = {
+  // Datos principales
+  title: string;
+  body: string;
+  userId: number;
+
+  // Metadatos opcionales
+  category?: string;
+  subcategory?: string;
+  tags?: string[];
+  language?: string;
+  status?: 'draft' | 'published' | 'archived';
+
+  // SEO
+  slug?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+
+  // Multimedia
+  coverImageUrl?: string;
+  thumbnailUrl?: string;
+  videoUrl?: string;
+
+  // Configuración
+  allowComments?: boolean;
+  isPinned?: boolean;
+};
+```
+
+```ts
+// service/api.service.ts — la función que arma el body HTTP
+import type { CreateFullPostPayload } from '../types/post.types';
+
+export const createFullPost = (payload: CreateFullPostPayload) =>
+  fetch('https://jsonplaceholder.typicode.com/posts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload), // envía todos los campos de una vez
+  }).then(res => res.json());
+```
+
+```ts
+// hooks/useCreateFullPost.ts — el hook recibe el tipo, no repite la definición
+import { useMutation } from '@tanstack/react-query';
+import { createFullPost } from '../service/api.service';
+import type { CreateFullPostPayload } from '../types/post.types';
+
+export const useCreateFullPost = () =>
+  useMutation({
+    mutationFn: (variables: CreateFullPostPayload) => createFullPost(variables),
+  });
+```
+
+```tsx
+// Componente — llama a mutate() con todos los campos del formulario
+function NuevoArticulo() {
+  const { mutate, isPending, isSuccess } = useCreateFullPost();
+
+  const handleSubmit = (formData: CreateFullPostPayload) => {
+    mutate({
+      title: formData.title,
+      body: formData.body,
+      userId: 1,
+      category: formData.category,
+      tags: formData.tags,
+      status: 'published',
+      slug: formData.slug,
+      metaTitle: formData.metaTitle,
+      metaDescription: formData.metaDescription,
+      coverImageUrl: formData.coverImageUrl,
+      allowComments: true,
+      isPinned: false,
+      // ... los que necesites
+    });
+  };
+
+  return (
+    <button onClick={() => handleSubmit(datosDelFormulario)} disabled={isPending}>
+      {isPending ? 'Publicando...' : 'Publicar artículo'}
+    </button>
+  );
+}
+```
+
+**Ventaja clave:** si mañana añades un campo nuevo, solo lo agregas al `type`. El hook y el service lo recogen automáticamente sin tocar nada más.
+
+| Capa             | Responsabilidad                                     |
+| ---------------- | --------------------------------------------------- |
+| `types/*.ts`     | Define los campos — la única fuente de verdad       |
+| `service/*.ts`   | Construye la petición HTTP con esos campos          |
+| `hooks/*.ts`     | Conecta TanStack con el service, tipado por el type |
+| `componente.tsx` | Llama a `mutate()` con los valores del formulario   |
+
+### Estilo recomendado — `variables: MiType` en lugar de desestructurar
+
+Cuando el payload tiene muchos campos, en lugar de desestructurar todo en los parámetros, es más limpio recibir el objeto completo tipado y acceder con `variables.campo`. El tipo viene del archivo de types y no se repite en el hook.
+
+```ts
+// types/export.types.ts — defines los campos una sola vez
+export type ExportRequest = {
+  sessionId: string;
+  fmt: 'zip';
+  file_name?: string;
+  folder_name?: string;
+  url?: string;
+};
+```
+
+```ts
+// service/api.service.ts — función que construye el body HTTP
+export const exportProposal = (sessionId: string, fmt: string, file_name?: string, folder_name?: string, url?: string): Promise<Blob> =>
+  apiClient.post(`/export/${sessionId}/${fmt}`, { file_name, folder_name, url }, { responseType: 'blob' }).then(res => res.data);
+```
+
+```ts
+// hooks/useExport.ts — el hook importa el type, no lo repite
+import { useMutation } from '@tanstack/react-query';
+import { exportProposal } from '../service/api.service';
+import type { ExportRequest } from '../types/export.types';
+
+export const useExport = () =>
+  useMutation({
+    mutationFn: (variables: ExportRequest) =>
+      exportProposal(
+        variables.sessionId, // ← accedes con variables.campo
+        variables.fmt,
+        variables.file_name,
+        variables.folder_name,
+        variables.url,
+      ),
+  });
+```
+
+```tsx
+// Componente — mutate() recibe el objeto completo tipado
+const exportProposal = useExport();
+
+exportProposal.mutate({
+  sessionId,
+  fmt: 'zip',
+  file_name: exportFileName.trim(),
+  folder_name: exportFolderName.trim(),
+  url: exportUrl.trim(),
+});
+```
+
+**¿Por qué `variables.campo` y no desestructurar?**
+
+```ts
+// ❌ Desestructurando — línea muy larga si hay muchos campos
+mutationFn: ({ sessionId, fmt, file_name, folder_name, url, campo4, campo5 }: ExportRequest) =>
+  exportProposal(sessionId, fmt, file_name, folder_name, url, campo4, campo5)
+
+// ✅ Con variables — más legible, escala bien con muchos campos
+mutationFn: (variables: ExportRequest) =>
+  exportProposal(variables.sessionId, variables.fmt, variables.file_name ...)
+```
+
+Las dos son **idénticas en runtime**, solo difieren en legibilidad.
 
 ---
 
@@ -777,17 +967,17 @@ const { mutate } = useCreatePost();
 mutate(
   { title: 'Nuevo post', body: 'Contenido', userId: 1 },
   {
-    onSuccess: (data) => {
+    onSuccess: data => {
       console.log('Post creado con ID:', data.id);
       router.push(`/posts/${data.id}`);
     },
-    onError: (error) => {
+    onError: error => {
       toast.error(`No se pudo crear: ${error.message}`);
     },
     onSettled: () => {
       setSubmitting(false);
     },
-  }
+  },
 );
 ```
 
@@ -825,13 +1015,13 @@ const handlePublish = async (formData: FormData) => {
 
 ### ¿Cuándo usar cada uno?
 
-| Situación | Usa |
-|-----------|-----|
-| Acción simple, no necesitas el resultado | `mutate` |
-| Necesitas el resultado para el siguiente paso | `mutateAsync` |
-| Varias operaciones en secuencia | `mutateAsync` |
-| Manejar éxito/error solo con `isSuccess`/`isError` | `mutate` |
-| Encadenar operaciones con `async/await` | `mutateAsync` |
+| Situación                                          | Usa           |
+| -------------------------------------------------- | ------------- |
+| Acción simple, no necesitas el resultado           | `mutate`      |
+| Necesitas el resultado para el siguiente paso      | `mutateAsync` |
+| Varias operaciones en secuencia                    | `mutateAsync` |
+| Manejar éxito/error solo con `isSuccess`/`isError` | `mutate`      |
+| Encadenar operaciones con `async/await`            | `mutateAsync` |
 
 > **Importante:** Con `mutateAsync`, siempre envuelve en `try/catch`. Si no lo haces y la mutación falla, obtendrás un error de Promise no capturada.
 
@@ -847,13 +1037,13 @@ const handlePublish = async (formData: FormData) => {
 useMutation({
   mutationFn: createPost,
 
-  onMutate: async (variables) => {
+  onMutate: async variables => {
     // Se ejecuta JUSTO ANTES de llamar a mutationFn
     // variables = los argumentos que se pasaron a mutate()
     // Útil para actualizaciones optimistas (ver sección 17)
     // Lo que devuelvas aquí llega como 'context' a los demás callbacks
     console.log('A punto de crear:', variables);
-    return { previousData: caché_guardado };  // context para rollback
+    return { previousData: caché_guardado }; // context para rollback
   },
 
   onSuccess: (data, variables, context) => {
@@ -931,13 +1121,13 @@ export const useCreateTodo = () => {
         body: JSON.stringify({ title: texto, completed: false, userId: 1 }),
       }).then(r => r.json()),
 
-    onSuccess: (data) => {
+    onSuccess: data => {
       // Invalida la lista después de crear
       queryClient.invalidateQueries({ queryKey: ['todos'] });
       toast.success(`Tarea "${data.title}" creada`);
     },
 
-    onError: (error) => {
+    onError: error => {
       toast.error(`Error al crear tarea: ${error.message}`);
     },
   });
@@ -989,10 +1179,7 @@ queryClient.invalidateQueries({ queryKey: ['posts'], exact: true });
 queryClient.setQueryData(['posts', newPost.id], newPost);
 
 // Actualizar con función (accede al valor anterior)
-queryClient.setQueryData<Post[]>(['posts'], (oldPosts = []) => [
-  ...oldPosts,
-  newPost,
-]);
+queryClient.setQueryData<Post[]>(['posts'], (oldPosts = []) => [...oldPosts, newPost]);
 ```
 
 ### `getQueryData` — leer el caché
@@ -1036,7 +1223,7 @@ export const useCreatePost = () => {
   return useMutation({
     mutationFn: (payload: CreatePostPayload) => postsService.create(payload),
 
-    onSuccess: (newPost) => {
+    onSuccess: newPost => {
       // Opción A — invalida y re-fetcha la lista (más simple, +1 request)
       queryClient.invalidateQueries({ queryKey: ['posts'] });
 
@@ -1064,11 +1251,9 @@ export const useCreatePost = () => {
 // GET /character/1  →  { episodes: ['https://...episode/1', ...] }
 // GET /episode/1    →  { name: 'Pilot', ... }
 
-const getCharacter = (id: number) =>
-  fetch(`https://rickandmortyapi.com/api/character/${id}`).then(r => r.json());
+const getCharacter = (id: number) => fetch(`https://rickandmortyapi.com/api/character/${id}`).then(r => r.json());
 
-const getEpisode = (id: number) =>
-  fetch(`https://rickandmortyapi.com/api/episode/${id}`).then(r => r.json());
+const getEpisode = (id: number) => fetch(`https://rickandmortyapi.com/api/episode/${id}`).then(r => r.json());
 
 function DetallesPersonaje({ characterId }: { characterId: number }) {
   // Query 1: obtener el personaje
@@ -1079,15 +1264,13 @@ function DetallesPersonaje({ characterId }: { characterId: number }) {
 
   // Extraer el ID del primer episodio del personaje
   const firstEpisodeUrl = character?.episode[0];
-  const episodeId = firstEpisodeUrl
-    ? Number(firstEpisodeUrl.split('/').at(-1))
-    : null;
+  const episodeId = firstEpisodeUrl ? Number(firstEpisodeUrl.split('/').at(-1)) : null;
 
   // Query 2: obtener el episodio (solo cuando tengamos el ID)
   const { data: episode } = useQuery({
     queryKey: ['episode', episodeId],
     queryFn: () => getEpisode(episodeId!),
-    enabled: episodeId !== null,  // ← espera a que la primera query tenga datos
+    enabled: episodeId !== null, // ← espera a que la primera query tenga datos
   });
 
   return (
@@ -1113,7 +1296,7 @@ const { data: user } = useQuery({
 const { data: repos } = useQuery({
   queryKey: ['github', 'repos', user?.login],
   queryFn: () => getGitHubRepos(user!.login),
-  enabled: !!user?.login,  // espera al usuario
+  enabled: !!user?.login, // espera al usuario
 });
 
 const mostStarredRepo = repos?.sort((a, b) => b.stargazers_count - a.stargazers_count)[0];
@@ -1121,7 +1304,7 @@ const mostStarredRepo = repos?.sort((a, b) => b.stargazers_count - a.stargazers_
 const { data: repoDetails } = useQuery({
   queryKey: ['github', 'repo', mostStarredRepo?.full_name],
   queryFn: () => getGitHubRepo(mostStarredRepo!.full_name),
-  enabled: !!mostStarredRepo?.full_name,  // espera al repo más estrellado
+  enabled: !!mostStarredRepo?.full_name, // espera al repo más estrellado
 });
 ```
 
@@ -1163,7 +1346,9 @@ function EquipoPersonajes({ ids }: { ids: number[] }) {
   return (
     <ul>
       {characters.map(c => (
-        <li key={c.id}>{c.name} — {c.status}</li>
+        <li key={c.id}>
+          {c.name} — {c.status}
+        </li>
       ))}
     </ul>
   );
@@ -1188,7 +1373,7 @@ const { data: characters, isLoading } = useQueries({
     queryKey: ['character', id],
     queryFn: () => getCharacter(id),
   })),
-  combine: (results) => ({
+  combine: results => ({
     data: results.map(r => r.data).filter(Boolean),
     isLoading: results.some(r => r.isPending),
     isError: results.some(r => r.isError),
@@ -1213,7 +1398,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query';
 // GET /pokemon?limit=20&offset=20  → página 2
 
 interface PokemonPage {
-  count: number;     // total de pokémon
+  count: number; // total de pokémon
   next: string | null;
   previous: string | null;
   results: { name: string; url: string }[];
@@ -1221,8 +1406,7 @@ interface PokemonPage {
 
 const getPokemonPage = (page: number): Promise<PokemonPage> => {
   const offset = (page - 1) * 20;
-  return fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${offset}`)
-    .then(r => r.json());
+  return fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${offset}`).then(r => r.json());
 };
 
 function ListaPokemon() {
@@ -1231,7 +1415,7 @@ function ListaPokemon() {
   const { data, isPending, isFetching, isPlaceholderData } = useQuery({
     queryKey: ['pokemon', 'page', page],
     queryFn: () => getPokemonPage(page),
-    placeholderData: keepPreviousData,  // ← mantiene la página anterior visible
+    placeholderData: keepPreviousData, // ← mantiene la página anterior visible
   });
 
   const totalPages = data ? Math.ceil(data.count / 20) : 0;
@@ -1253,17 +1437,13 @@ function ListaPokemon() {
       )}
 
       <div>
-        <button
-          disabled={page === 1 || isFetching}
-          onClick={() => setPage(p => p - 1)}
-        >
+        <button disabled={page === 1 || isFetching} onClick={() => setPage(p => p - 1)}>
           Anterior
         </button>
-        <span>Página {page} de {totalPages}</span>
-        <button
-          disabled={!hasNextPage || isFetching}
-          onClick={() => setPage(p => p + 1)}
-        >
+        <span>
+          Página {page} de {totalPages}
+        </span>
+        <button disabled={!hasNextPage || isFetching} onClick={() => setPage(p => p + 1)}>
           {isFetching ? 'Cargando...' : 'Siguiente'}
         </button>
       </div>
@@ -1299,6 +1479,7 @@ useEffect(() => {
 **¿Cuándo usarlo?** Listas largas donde el usuario hace scroll o hace clic en "Cargar más".
 
 **¿Qué diferencia tiene de `useQuery`?**
+
 - `data` tiene forma `{ pages: T[], pageParams: unknown[] }` en vez del dato directo
 - Requiere `initialPageParam` y `getNextPageParam`
 - Tiene `fetchNextPage()` para pedir más datos
@@ -1323,11 +1504,9 @@ function PokemonInfinitos() {
     isError,
   } = useInfiniteQuery({
     queryKey: ['pokemon', 'infinite'],
-    queryFn: ({ pageParam }) =>
-      fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pageParam}`)
-        .then(r => r.json()),
+    queryFn: ({ pageParam }) => fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pageParam}`).then(r => r.json()),
 
-    initialPageParam: 0,  // valor inicial del offset
+    initialPageParam: 0, // valor inicial del offset
 
     getNextPageParam: (lastPage, allPages) => {
       // lastPage.next = 'https://pokeapi.co/api/v2/pokemon?offset=20&limit=20'
@@ -1355,15 +1534,8 @@ function PokemonInfinitos() {
         </div>
       ))}
 
-      <button
-        onClick={() => fetchNextPage()}
-        disabled={!hasNextPage || isFetchingNextPage}
-      >
-        {isFetchingNextPage
-          ? 'Cargando más...'
-          : hasNextPage
-            ? 'Cargar más'
-            : 'No hay más pokémon'}
+      <button onClick={() => fetchNextPage()} disabled={!hasNextPage || isFetchingNextPage}>
+        {isFetchingNextPage ? 'Cargando más...' : hasNextPage ? 'Cargar más' : 'No hay más pokémon'}
       </button>
     </div>
   );
@@ -1376,10 +1548,9 @@ function PokemonInfinitos() {
 function PokemonScrollInfinito() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ['pokemon', 'infinite'],
-    queryFn: ({ pageParam }) =>
-      fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pageParam}`).then(r => r.json()),
+    queryFn: ({ pageParam }) => fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${pageParam}`).then(r => r.json()),
     initialPageParam: 0,
-    getNextPageParam: (lastPage, allPages) => lastPage.next ? allPages.length * 20 : undefined,
+    getNextPageParam: (lastPage, allPages) => (lastPage.next ? allPages.length * 20 : undefined),
   });
 
   const loaderRef = useRef<HTMLDivElement>(null);
@@ -1399,12 +1570,12 @@ function PokemonScrollInfinito() {
     <div>
       {data?.pages.map((page, i) => (
         <div key={i}>
-          {page.results.map(p => <div key={p.name}>{p.name}</div>)}
+          {page.results.map(p => (
+            <div key={p.name}>{p.name}</div>
+          ))}
         </div>
       ))}
-      <div ref={loaderRef}>
-        {isFetchingNextPage ? 'Cargando más...' : ''}
-      </div>
+      <div ref={loaderRef}>{isFetchingNextPage ? 'Cargando más...' : ''}</div>
     </div>
   );
 }
@@ -1416,31 +1587,30 @@ function PokemonScrollInfinito() {
 // GitHub API: GET /users con cursor de pagination
 useInfiniteQuery({
   queryKey: ['github', 'users'],
-  queryFn: ({ pageParam }) =>
-    fetch(`https://api.github.com/users?since=${pageParam}&per_page=30`).then(r => r.json()),
+  queryFn: ({ pageParam }) => fetch(`https://api.github.com/users?since=${pageParam}&per_page=30`).then(r => r.json()),
 
   initialPageParam: 0,
 
-  getNextPageParam: (lastPage) => {
+  getNextPageParam: lastPage => {
     // El último usuario de la página es el 'cursor' para la siguiente
     if (lastPage.length < 30) return undefined; // última página
-    return lastPage[lastPage.length - 1].id;    // ID del último usuario
+    return lastPage[lastPage.length - 1].id; // ID del último usuario
   },
 });
 ```
 
 ### Todas las propiedades de `useInfiniteQuery`
 
-| Propiedad | Descripción |
-|-----------|-------------|
-| `data.pages` | Array donde cada elemento es el resultado de una llamada a `queryFn` |
-| `data.pageParams` | Array con los `pageParam` usados en cada llamada |
-| `fetchNextPage()` | Pide la siguiente página usando `getNextPageParam` |
-| `fetchPreviousPage()` | Pide la página anterior usando `getPreviousPageParam` |
-| `hasNextPage` | `true` si `getNextPageParam` devuelve algo distinto de `undefined/null` |
-| `hasPreviousPage` | `true` si `getPreviousPageParam` devuelve algo |
-| `isFetchingNextPage` | `true` mientras carga la siguiente página |
-| `isFetchingPreviousPage` | `true` mientras carga la página anterior |
+| Propiedad                | Descripción                                                             |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `data.pages`             | Array donde cada elemento es el resultado de una llamada a `queryFn`    |
+| `data.pageParams`        | Array con los `pageParam` usados en cada llamada                        |
+| `fetchNextPage()`        | Pide la siguiente página usando `getNextPageParam`                      |
+| `fetchPreviousPage()`    | Pide la página anterior usando `getPreviousPageParam`                   |
+| `hasNextPage`            | `true` si `getNextPageParam` devuelve algo distinto de `undefined/null` |
+| `hasPreviousPage`        | `true` si `getPreviousPageParam` devuelve algo                          |
+| `isFetchingNextPage`     | `true` mientras carga la siguiente página                               |
+| `isFetchingPreviousPage` | `true` mientras carga la página anterior                                |
 
 ---
 
@@ -1456,18 +1626,19 @@ El más simple. Solo muestra un elemento temporal desde `variables` mientras la 
 
 ```tsx
 // JSONPlaceholder: añadir un todo optimistamente
-export const useCreateTodo = () => useMutation({
-  mutationFn: (title: string) =>
-    fetch('https://jsonplaceholder.typicode.com/todos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, completed: false, userId: 1 }),
-    }).then(r => r.json()),
+export const useCreateTodo = () =>
+  useMutation({
+    mutationFn: (title: string) =>
+      fetch('https://jsonplaceholder.typicode.com/todos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, completed: false, userId: 1 }),
+      }).then(r => r.json()),
 
-  onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: ['todos'] });
-  },
-});
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
 
 // Componente
 function ListaTodos() {
@@ -1476,7 +1647,9 @@ function ListaTodos() {
 
   return (
     <ul>
-      {todos?.map(todo => <li key={todo.id}>{todo.title}</li>)}
+      {todos?.map(todo => (
+        <li key={todo.id}>{todo.title}</li>
+      ))}
 
       {/* Ítem temporal mientras se crea */}
       {isPending && (
@@ -1520,9 +1693,7 @@ function useToggleTodo() {
       const previousTodos = queryClient.getQueryData<Todo[]>(['todos']);
 
       // 3. Actualiza el caché optimistamente
-      queryClient.setQueryData<Todo[]>(['todos'], old =>
-        old?.map(todo => todo.id === id ? { ...todo, completed } : todo) ?? []
-      );
+      queryClient.setQueryData<Todo[]>(['todos'], old => old?.map(todo => (todo.id === id ? { ...todo, completed } : todo)) ?? []);
 
       // 4. Devuelve el snapshot — llegará como 'context' a onError
       return { previousTodos };
@@ -1548,11 +1719,7 @@ function TodoItem({ todo }: { todo: Todo }) {
 
   return (
     <li>
-      <input
-        type="checkbox"
-        checked={todo.completed}
-        onChange={(e) => toggleTodo({ id: todo.id, completed: e.target.checked })}
-      />
+      <input type="checkbox" checked={todo.completed} onChange={e => toggleTodo({ id: todo.id, completed: e.target.checked })} />
       {todo.title}
     </li>
   );
@@ -1561,13 +1728,13 @@ function TodoItem({ todo }: { todo: Todo }) {
 
 ### ¿Cuándo usar cada método?
 
-| Situación | Método |
-|-----------|--------|
-| Añadir un nuevo ítem a una lista | Via UI (Método 1) |
-| Toggle/checkbox que cambia un ítem existente | Via caché (Método 2) |
-| El cambio se ve en varios componentes a la vez | Via caché (Método 2) |
-| Quieres menos código y no necesitas rollback preciso | Via UI (Método 1) |
-| La operación es crítica y debe revertir limpiamente | Via caché (Método 2) |
+| Situación                                            | Método               |
+| ---------------------------------------------------- | -------------------- |
+| Añadir un nuevo ítem a una lista                     | Via UI (Método 1)    |
+| Toggle/checkbox que cambia un ítem existente         | Via caché (Método 2) |
+| El cambio se ve en varios componentes a la vez       | Via caché (Método 2) |
+| Quieres menos código y no necesitas rollback preciso | Via UI (Método 1)    |
+| La operación es crítica y debe revertir limpiamente  | Via caché (Método 2) |
 
 ---
 
@@ -1584,14 +1751,15 @@ useQuery({
   queryKey: ['github', 'user', username],
   queryFn: () => getGitHubUser(username),
 
-  staleTime: 0,                  // siempre obsoleto (por defecto)
-  staleTime: 1000 * 60 * 5,      // 5 minutos frescos
-  staleTime: 1000 * 60 * 60,     // 1 hora fresca
-  staleTime: Infinity,           // nunca obsoleto (no re-fetcha automáticamente)
+  staleTime: 0, // siempre obsoleto (por defecto)
+  staleTime: 1000 * 60 * 5, // 5 minutos frescos
+  staleTime: 1000 * 60 * 60, // 1 hora fresca
+  staleTime: Infinity, // nunca obsoleto (no re-fetcha automáticamente)
 });
 ```
 
 **Cuándo usar `staleTime` alto:**
+
 - Datos que cambian poco: perfiles, configuración, catálogos estáticos
 - APIs con rate-limit (GitHub limita a 60 req/hora sin auth)
 - Datos del usuario autenticado (cambian solo si él mismo los edita)
@@ -1605,10 +1773,10 @@ useQuery({
   queryKey: ['posts'],
   queryFn: getPosts,
 
-  gcTime: 0,                   // elimina del caché inmediatamente al desmontar
-  gcTime: 1000 * 60 * 5,       // 5 minutos (por defecto)
-  gcTime: 1000 * 60 * 30,      // 30 minutos
-  gcTime: Infinity,            // nunca elimina del caché
+  gcTime: 0, // elimina del caché inmediatamente al desmontar
+  gcTime: 1000 * 60 * 5, // 5 minutos (por defecto)
+  gcTime: 1000 * 60 * 30, // 30 minutos
+  gcTime: Infinity, // nunca elimina del caché
 });
 ```
 
@@ -1621,16 +1789,16 @@ useQuery({
   queryKey: ['posts'],
   queryFn: getPosts,
 
-  retry: 3,                                          // por defecto
-  retry: false,                                      // no reintenta
-  retry: 1,                                          // solo 1 reintento
+  retry: 3, // por defecto
+  retry: false, // no reintenta
+  retry: 1, // solo 1 reintento
   retry: (failureCount, error) => {
     // Lógica personalizada: no reintenta en errores 4xx (son errores del cliente)
     if (error.status >= 400 && error.status < 500) return false;
     return failureCount < 3;
   },
 
-  retryDelay: 1000,                                  // espera fija 1 seg entre reintentos
+  retryDelay: 1000, // espera fija 1 seg entre reintentos
   retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), // exponencial
   // intento 0 → 1s, intento 1 → 2s, intento 2 → 4s, ..., máx 30s
 });
@@ -1645,8 +1813,8 @@ useQuery({
   queryKey: ['settings'],
   queryFn: getSettings,
 
-  refetchOnWindowFocus: true,     // por defecto — re-fetcha si está stale
-  refetchOnWindowFocus: false,    // nunca re-fetcha al enfocar
+  refetchOnWindowFocus: true, // por defecto — re-fetcha si está stale
+  refetchOnWindowFocus: false, // nunca re-fetcha al enfocar
   refetchOnWindowFocus: 'always', // re-fetcha SIEMPRE al enfocar (aunque esté fresco)
 });
 ```
@@ -1655,8 +1823,8 @@ useQuery({
 
 ```tsx
 useQuery({
-  refetchOnMount: true,     // por defecto — re-fetcha si está stale
-  refetchOnMount: false,    // usa el caché siempre, no re-fetcha al montar
+  refetchOnMount: true, // por defecto — re-fetcha si está stale
+  refetchOnMount: false, // usa el caché siempre, no re-fetcha al montar
   refetchOnMount: 'always', // re-fetcha al montar aunque esté fresco
 });
 ```
@@ -1665,7 +1833,7 @@ useQuery({
 
 ```tsx
 useQuery({
-  refetchOnReconnect: true,     // por defecto
+  refetchOnReconnect: true, // por defecto
   refetchOnReconnect: false,
   refetchOnReconnect: 'always',
 });
@@ -1677,13 +1845,10 @@ useQuery({
 // Open-Meteo: actualiza el clima cada 60 segundos
 useQuery({
   queryKey: ['weather', { lat: 40.4165, lon: -3.7026 }],
-  queryFn: () =>
-    fetch(
-      'https://api.open-meteo.com/v1/forecast?latitude=40.42&longitude=-3.70&current_weather=true'
-    ).then(r => r.json()),
+  queryFn: () => fetch('https://api.open-meteo.com/v1/forecast?latitude=40.42&longitude=-3.70&current_weather=true').then(r => r.json()),
 
-  refetchInterval: 1000 * 60,          // cada 60 segundos
-  refetchIntervalInBackground: false,  // pausa el polling si el usuario no está en la pestaña
+  refetchInterval: 1000 * 60, // cada 60 segundos
+  refetchIntervalInBackground: false, // pausa el polling si el usuario no está en la pestaña
 });
 
 // Polling condicional — solo mientras el estado sea 'procesando'
@@ -1691,7 +1856,7 @@ const { data } = useQuery({
   queryKey: ['job', jobId],
   queryFn: () => getJobStatus(jobId),
 
-  refetchInterval: (query) => {
+  refetchInterval: query => {
     // Sigue haciendo polling hasta que el job termine
     if (query.state.data?.status === 'completed') return false;
     if (query.state.data?.status === 'failed') return false;
@@ -1707,10 +1872,9 @@ const { data } = useQuery({
 // Pero solo quieres el array de pokémon con solo nombre+url
 const { data: pokemonNames } = useQuery({
   queryKey: ['pokemon'],
-  queryFn: () =>
-    fetch('https://pokeapi.co/api/v2/pokemon?limit=20').then(r => r.json()),
+  queryFn: () => fetch('https://pokeapi.co/api/v2/pokemon?limit=20').then(r => r.json()),
 
-  select: (data) => data.results.map((p: { name: string }) => p.name),
+  select: data => data.results.map((p: { name: string }) => p.name),
   // data ahora es string[] en vez del objeto completo
 });
 
@@ -1718,7 +1882,7 @@ const { data: pokemonNames } = useQuery({
 const { data: sortedPosts } = useQuery({
   queryKey: ['posts'],
   queryFn: getPosts,
-  select: (posts) => [...posts].sort((a, b) => b.id - a.id),
+  select: posts => [...posts].sort((a, b) => b.id - a.id),
   // El caché guarda los posts originales; select transforma solo lo que se devuelve
 });
 ```
@@ -1750,8 +1914,8 @@ const { data: post } = useQuery({
 useQuery({
   queryKey: ['critical-data'],
   queryFn: getCriticalData,
-  throwOnError: true,       // lanza el error al Error Boundary más cercano
-  throwOnError: (error) => error.status >= 500, // solo en errores del servidor
+  throwOnError: true, // lanza el error al Error Boundary más cercano
+  throwOnError: error => error.status >= 500, // solo en errores del servidor
 });
 ```
 
@@ -1759,8 +1923,8 @@ useQuery({
 
 ```tsx
 useQuery({
-  networkMode: 'online',  // por defecto — pausa en offline
-  networkMode: 'always',  // ejecuta siempre, incluido offline
+  networkMode: 'online', // por defecto — pausa en offline
+  networkMode: 'always', // ejecuta siempre, incluido offline
   networkMode: 'offlineFirst', // intenta siempre, pausa solo si falla por red
 });
 ```
@@ -1772,6 +1936,7 @@ useQuery({
 **¿Qué es?** Hook que permite leer el estado de una `useMutation` **desde cualquier componente**, aunque la mutación se definió en otro componente completamente diferente.
 
 **¿Cuándo usarlo?**
+
 - Mostrar un spinner global mientras hay mutaciones pendientes
 - Mostrar ítem temporal en una lista mientras se crea en otro componente
 - Un componente de notificaciones que sabe qué mutations están en curso
@@ -1783,7 +1948,7 @@ useQuery({
 function FormularioPost() {
   const { mutate } = useMutation({
     mutationFn: (title: string) => postsService.create({ title, body: '', userId: 1 }),
-    mutationKey: ['create-post'],  // ← necesario para useMutationState
+    mutationKey: ['create-post'], // ← necesario para useMutationState
   });
 
   return <button onClick={() => mutate('Mi nuevo post')}>Crear</button>;
@@ -1799,15 +1964,19 @@ function ListaDePosts() {
       mutationKey: ['create-post'],
       status: 'pending',
     },
-    select: (mutation) => mutation.state.variables as string,
+    select: mutation => mutation.state.variables as string,
   });
 
   return (
     <ul>
-      {posts?.map(p => <li key={p.id}>{p.title}</li>)}
+      {posts?.map(p => (
+        <li key={p.id}>{p.title}</li>
+      ))}
       {/* Muestra los posts que se están creando ahora mismo */}
       {pendingTitles.map((title, i) => (
-        <li key={i} style={{ opacity: 0.5 }}>{title} (enviando...)</li>
+        <li key={i} style={{ opacity: 0.5 }}>
+          {title} (enviando...)
+        </li>
       ))}
     </ul>
   );
@@ -1826,7 +1995,7 @@ const isGloballyLoading = pendingMutations.length > 0;
 // Ver los datos del último resultado exitoso de una mutación
 const [lastCreatedPost] = useMutationState<Post>({
   filters: { mutationKey: ['create-post'], status: 'success' },
-  select: (mutation) => mutation.state.data as Post,
+  select: mutation => mutation.state.data as Post,
 });
 // lastCreatedPost → el post que devolvió el servidor en el último éxito
 ```
@@ -1856,18 +2025,20 @@ src/
 // api/services/posts.service.ts
 const BASE = 'https://jsonplaceholder.typicode.com';
 
-export interface Post { id: number; title: string; body: string; userId: number; }
+export interface Post {
+  id: number;
+  title: string;
+  body: string;
+  userId: number;
+}
 export type CreatePost = Omit<Post, 'id'>;
 
 export const postsService = {
-  getAll: (): Promise<Post[]> =>
-    fetch(`${BASE}/posts`).then(r => r.json()),
+  getAll: (): Promise<Post[]> => fetch(`${BASE}/posts`).then(r => r.json()),
 
-  getById: (id: number): Promise<Post> =>
-    fetch(`${BASE}/posts/${id}`).then(r => r.json()),
+  getById: (id: number): Promise<Post> => fetch(`${BASE}/posts/${id}`).then(r => r.json()),
 
-  getByUser: (userId: number): Promise<Post[]> =>
-    fetch(`${BASE}/users/${userId}/posts`).then(r => r.json()),
+  getByUser: (userId: number): Promise<Post[]> => fetch(`${BASE}/users/${userId}/posts`).then(r => r.json()),
 
   create: (data: CreatePost): Promise<Post> =>
     fetch(`${BASE}/posts`, {
@@ -1883,8 +2054,7 @@ export const postsService = {
       body: JSON.stringify(data),
     }).then(r => r.json()),
 
-  delete: (id: number): Promise<void> =>
-    fetch(`${BASE}/posts/${id}`, { method: 'DELETE' }).then(() => undefined),
+  delete: (id: number): Promise<void> => fetch(`${BASE}/posts/${id}`, { method: 'DELETE' }).then(() => undefined),
 };
 
 // api/hooks/usePosts.ts
@@ -1899,8 +2069,7 @@ export const postKeys = {
 };
 
 // Leer todos los posts
-export const usePosts = () =>
-  useQuery({ queryKey: postKeys.lists(), queryFn: postsService.getAll });
+export const usePosts = () => useQuery({ queryKey: postKeys.lists(), queryFn: postsService.getAll });
 
 // Leer un post por ID
 export const usePost = (id: number) =>
@@ -1931,9 +2100,8 @@ export const useCreatePost = () => {
 export const useUpdatePost = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: number } & Partial<CreatePost>) =>
-      postsService.update(id, data),
-    onSuccess: (updatedPost) => {
+    mutationFn: ({ id, ...data }: { id: number } & Partial<CreatePost>) => postsService.update(id, data),
+    onSuccess: updatedPost => {
       queryClient.setQueryData(postKeys.detail(updatedPost.id), updatedPost);
       queryClient.invalidateQueries({ queryKey: postKeys.lists() });
     },
@@ -1953,31 +2121,89 @@ export const useDeletePost = () => {
 };
 ```
 
+### Alternativa v5: `queryOptions()` — reutilizar la config fuera de hooks
+
+TanStack Query v5 introduce `queryOptions()` como alternativa a los custom hooks cuando necesitas usar la misma configuración (clave + función) **fuera de un componente React**: prefetch en Server Components, loaders de Next.js o React Router, tests, etc.
+
+```tsx
+import { queryOptions } from '@tanstack/react-query';
+import { postsService } from '../services/posts.service';
+import { postKeys } from './postKeys';
+
+// Combina clave + función en un objeto reutilizable con tipado automático
+export const postQueryOptions = {
+  list: () =>
+    queryOptions({
+      queryKey: postKeys.lists(),
+      queryFn: postsService.getAll,
+    }),
+
+  detail: (id: number) =>
+    queryOptions({
+      queryKey: postKeys.detail(id),
+      queryFn: () => postsService.getById(id),
+      enabled: !!id,
+    }),
+};
+```
+
+**En un componente React (equivale al hook):**
+
+```tsx
+function PostList() {
+  const { data } = useQuery(postQueryOptions.list());
+  // mismo resultado que: useQuery({ queryKey: postKeys.lists(), queryFn: postsService.getAll })
+}
+```
+
+**En un Server Component de Next.js (prefetch antes de renderizar):**
+
+```tsx
+// app/posts/page.tsx (Server Component)
+import { getQueryClient } from '@/lib/queryClient';
+import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
+import { postQueryOptions } from '@/api/hooks/postQueryOptions';
+
+export default async function PostsPage() {
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery(postQueryOptions.list());
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <PostList /> {/* ya tiene los datos en caché, sin spinner inicial */}
+    </HydrationBoundary>
+  );
+}
+```
+
+> **¿Hooks o `queryOptions()`?** Para queries simples que solo se usan en componentes, los hooks con `useQuery` son suficientes. Usa `queryOptions()` cuando necesites la misma config en varios lugares o en código que corre fuera del ciclo React (loaders, server, tests).
+
 ---
 
 ## 21 — Resumen: cuándo usar cada herramienta
 
-| ¿Qué quieres hacer? | Herramienta |
-|----|-----|
-| Obtener datos de una API (GET) | `useQuery` |
-| Crear un recurso (POST) | `useMutation` |
-| Actualizar un recurso (PUT/PATCH) | `useMutation` |
-| Borrar un recurso (DELETE) | `useMutation` |
-| Ejecutar acción y no necesitas el resultado | `mutate` |
-| Encadenar operaciones que dependen entre sí | `mutateAsync` |
-| Reaccionar con callbacks (onSuccess, onError) | `mutate` o callbacks en `useMutation` |
-| Query que depende del resultado de otra query | `useQuery` + `enabled` |
-| Varias queries a la vez (número variable) | `useQueries` |
-| Varias queries a la vez (número fijo) | Varios `useQuery` en paralelo |
-| Lista paginada (página 1, 2, 3...) | `useQuery` + `keepPreviousData` |
-| Lista de scroll infinito o "cargar más" | `useInfiniteQuery` |
-| UI optimista sin tocar caché | `variables` + `isPending` en JSX |
-| UI optimista con rollback en caché | `onMutate` + `onError` + `setQueryData` |
-| Forzar recarga de datos | `refetch()` o `invalidateQueries()` |
-| Actualizar caché sin nueva petición HTTP | `queryClient.setQueryData()` |
-| Leer caché desde otro componente | `queryClient.getQueryData()` |
-| Ver estado de mutation en otro componente | `useMutationState` + `mutationKey` |
-| Polling (actualización automática por tiempo) | `refetchInterval` en `useQuery` |
-| Datos que casi nunca cambian (sin re-fetch) | `staleTime: Infinity` |
-| Queries de búsqueda (disparadas manualmente) | `enabled: false` + `refetch()` |
-| Precargar datos antes de navegar | `queryClient.prefetchQuery()` |
+| ¿Qué quieres hacer?                           | Herramienta                             |
+| --------------------------------------------- | --------------------------------------- |
+| Obtener datos de una API (GET)                | `useQuery`                              |
+| Crear un recurso (POST)                       | `useMutation`                           |
+| Actualizar un recurso (PUT/PATCH)             | `useMutation`                           |
+| Borrar un recurso (DELETE)                    | `useMutation`                           |
+| Ejecutar acción y no necesitas el resultado   | `mutate`                                |
+| Encadenar operaciones que dependen entre sí   | `mutateAsync`                           |
+| Reaccionar con callbacks (onSuccess, onError) | `mutate` o callbacks en `useMutation`   |
+| Query que depende del resultado de otra query | `useQuery` + `enabled`                  |
+| Varias queries a la vez (número variable)     | `useQueries`                            |
+| Varias queries a la vez (número fijo)         | Varios `useQuery` en paralelo           |
+| Lista paginada (página 1, 2, 3...)            | `useQuery` + `keepPreviousData`         |
+| Lista de scroll infinito o "cargar más"       | `useInfiniteQuery`                      |
+| UI optimista sin tocar caché                  | `variables` + `isPending` en JSX        |
+| UI optimista con rollback en caché            | `onMutate` + `onError` + `setQueryData` |
+| Forzar recarga de datos                       | `refetch()` o `invalidateQueries()`     |
+| Actualizar caché sin nueva petición HTTP      | `queryClient.setQueryData()`            |
+| Leer caché desde otro componente              | `queryClient.getQueryData()`            |
+| Ver estado de mutation en otro componente     | `useMutationState` + `mutationKey`      |
+| Polling (actualización automática por tiempo) | `refetchInterval` en `useQuery`         |
+| Datos que casi nunca cambian (sin re-fetch)   | `staleTime: Infinity`                   |
+| Queries de búsqueda (disparadas manualmente)  | `enabled: false` + `refetch()`          |
+| Precargar datos antes de navegar              | `queryClient.prefetchQuery()`           |
+| Reutilizar config (key + fn) fuera de hooks   | `queryOptions()`                        |
